@@ -1,0 +1,63 @@
+# Common ignores
+.DS_Store
+*.log
+*.pem
+*.swp
+*.swo
+
+# Environment files
+.env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python ignores (for ai-engine)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.pytest_cache/
+.coverage
+
+# Node.js ignores (for express-server and frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.pnpm-debug.log*
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js specific (for frontend)
+.next/
+.out/
+
+# Testing
+/coverage
+
+# Build outputs
+/build
+dist/
+build/
+
+# IDE specific files
+.idea/
+.vscode/
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
