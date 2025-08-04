@@ -10,11 +10,13 @@ app.get('/',(req,res)=>{
 const data = {
     message: "Hello from Express Server"
 }
-async function postData() {
-    const response = await axios.post('http://localhost:8000/ai-server', data)
-    console.log(response.data)
-}
-postData();
+
+
+// async function postData() {
+//     const response = await axios.post('http://localhost:8000/ai-server', data)
+//     console.log(response.data)
+// }
+// postData();
 
 
 app.listen(4000, () => {
