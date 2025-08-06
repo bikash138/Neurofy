@@ -3,6 +3,22 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.ProseMirror {
+  outline: none !important; 
+  padding-left: 0.25rem;
+  cursor: text;
+}
+
+[contenteditable].title:empty::before {
+  content: attr(data-placeholder); /* Use the data-placeholder attribute */
+  color: #9ca3af; /* Tailwind's gray-500 for muted text */
+  pointer-events: none; /* Prevent interaction with the placeholder */
+  opacity: 0.5; /* Make the placeholder text slightly transparent */
+  font-size: 1.5rem; /* Larger font size for title */
+  font-weight: bold; /* Make the title placeholder bold */
+  padding-left: 0.25rem; /* Add padding for alignment */
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

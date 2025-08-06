@@ -5,6 +5,7 @@ import { ThemeProvider } from "./ThemeProvider";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import TopBar from "@/components/dashboard/TopBar";
 import { NotesHeader } from "@/components/dashboard/NotesHeader";
+import { ChatProvider } from "./ChatPanelContextProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +37,13 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-        >            
-          <Sidebar/>
-          <TopBar/>
-          {/* <NotesHeader/> */}
-          {children}
+        >      
+          <ChatProvider>      
+            <Sidebar/>
+            <TopBar/>
+            {/* <NotesHeader/> */}
+            {children}
+          </ChatProvider>
         </ThemeProvider>
       </body>
     </html>

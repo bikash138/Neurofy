@@ -1,14 +1,15 @@
-import { Card, CardContent } from '@/components/ui/card';
+'use client'
 import { stickyNotes } from '@/lib/data';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import NotesCard from '../core/NotesCard';
+import Link from 'next/link';
 
 export function StickyNotes() {
   return (
-    <div className="px-6 py-8">
+    <div className="pr-3">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-muted-foreground uppercase tracking-wide">
-          OTHERS
+          Your Neuros
         </h2>
       </div>
       
@@ -27,31 +28,9 @@ export function StickyNotes() {
             whileHover={{ scale: 1.02 }}
             className="group"
           >
-            <Card className={cn(
-              "rounded-2xl border-0 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[300px]",
-              note.color,
-              note.darkColor
-            )}>
-              <CardContent className="p-5 h-full">
-                <h3 className="font-bold text-lg mb-4 text-gray-800 dark:text-gray-100">
-                  {note.title}
-                </h3>
-                <div className="space-y-1 text-sm text-gray-700 dark:text-gray-200">
-                  {note.content.map((line, lineIndex) => (
-                    <div 
-                      key={lineIndex} 
-                      className={cn(
-                        "leading-relaxed",
-                        line.startsWith('TOTAL') || line.includes('TOTAL') ? "font-bold" : "",
-                        line === '' ? "h-2" : ""
-                      )}
-                    >
-                      {line || '\u00A0'}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <Link href={`/notes/${note.id}`}>
+              <NotesCard note={note} />
+            </Link>
           </motion.div>
         ))}
       </div>
