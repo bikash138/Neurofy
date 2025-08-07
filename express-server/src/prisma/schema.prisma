@@ -14,10 +14,15 @@ model User {
   createdAt   DateTime @default(now())
 }
 model Note {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
   content   Json?
   userId    String
+  pinned    Boolean   @default(false)
+  tags      String[]
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 }
+
+

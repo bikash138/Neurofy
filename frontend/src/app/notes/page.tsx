@@ -1,12 +1,12 @@
 import { StickyNotes } from '@/components/dashboard/StickyNotes'
 import React from 'react'
 
-const page = () => {
+const Page = async () => {
   return (
     <>
-        <StickyNotes/>
+      <StickyNotes/>
     </>
   )
 }
 
-export default page
+export default Page

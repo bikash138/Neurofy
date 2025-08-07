@@ -2,41 +2,40 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Button } from '@/components/ui/button';
 import { useEffect, useRef } from 'react';
 import axios from 'axios'
 import debounce from 'lodash.debounce';
+import { NoteType } from '@/types/types';
+import { formatDate } from '@/lib/formatDate';
 
-const NotePage = ({ noteId, note }: { noteId: string, note: any }) => {
-    const editor = useEditor({
-        extensions: [
-        StarterKit,
-        Placeholder.configure({
-            placeholder: 'Start writing your neuros...',
-            emptyEditorClass:
-            'text-muted-foreground before:content-[attr(data-placeholder)] before:absolute before:opacity-50 before:text-base before:text-gray-400 before:font-normal before:pl-[0.25rem]',
-        }),
-        ],
-        content: note?.content || '',
-        onUpdate({ editor }) {
-        debouncedSave();
-        },
-        editorProps: {
-        attributes: {
-            spellcheck: 'false',
-        },
-        },
-        immediatelyRender: false,
-    });
+const NotePage = ({ noteId, note }: { noteId: string, note: NoteType }) => {
 
-    useEffect(() => {
-        if (titleRef.current && note?.title) {
-            titleRef.current.innerText = note.title;
-        }
-    }, [note?.title]);
+  const editor = useEditor({
+      extensions: [
+      StarterKit,
+      Placeholder.configure({
+          placeholder: 'Start writing your neuros...',
+          emptyEditorClass:
+          'text-muted-foreground before:content-[attr(data-placeholder)] before:absolute before:opacity-50 before:text-base before:text-gray-400 before:font-normal before:pl-[0.25rem]',
+      }),
+      ],
+      content: note?.content || '',
+      onUpdate({ editor }) {
+      debouncedSave();
+      },
+      editorProps: {
+      attributes: {
+          spellcheck: 'false',
+      },
+      },
+      immediatelyRender: false,
+  });
 
-
-  console.log(note)
+  useEffect(() => {
+      if (titleRef.current && note?.title) {
+        titleRef.current.innerText = note.title;
+      }
+  }, [note?.title]);
 
   //@ts-ignore
   const saveNote = async () => {
@@ -53,15 +52,18 @@ const NotePage = ({ noteId, note }: { noteId: string, note: any }) => {
   const debouncedSave = debounce(saveNote, 1000); 
 
   const titleRef = useRef<HTMLDivElement>(null)
-
+  const updatedAt = formatDate(note.updatedAt)
 
   return (
     <div className="pr-3">
+      <div className="text-xs text-gray-500 dark:text-gray-400 mb-4 text-right italic">
+        Edited: {updatedAt ? updatedAt : 'Never'}
+      </div>
       {/* Title Section */}
       <div
         ref={titleRef}
         contentEditable
-        className="title min-h-[40px] mb-2 text-[1.5rem] pl-[0.25rem] font-bold outline-none"
+        className="title min-h-[40px] mb-2 text-[1.5rem] pl-[0.25rem] font-bold outline-none ml-4"
         aria-placeholder="Untitled Neuro"
         data-placeholder="Untitled Neuro"
         onInput={debouncedSave}
@@ -78,7 +80,7 @@ const NotePage = ({ noteId, note }: { noteId: string, note: any }) => {
           e.preventDefault() 
           editor?.commands.focus()
         }} 
-        className="dark:bg-background cursor-text bg-white min-h-screen"
+        className="dark:bg-background cursor-text bg-white min-h-screen ml-4"
       >
         <EditorContent editor={editor} className="prose dark:prose-invert max-w-full outline-none" />
       </div>

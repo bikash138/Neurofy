@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "public"."Note" ADD COLUMN     "tags" TEXT[],
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
