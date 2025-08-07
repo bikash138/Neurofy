@@ -11,6 +11,9 @@ importers:
       '@prisma/client':
         specifier: 6.13.0
         version: 6.13.0(prisma@6.13.0(typescript@5.9.2))(typescript@5.9.2)
+      '@types/cors':
+        specifier: ^2.8.19
+        version: 2.8.19
       axios:
         specifier: ^1.11.0
         version: 1.11.0
@@ -120,6 +123,9 @@ packages:
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
+
+  '@types/cors@2.8.19':
+    resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
 
   '@types/express-serve-static-core@5.0.7':
     resolution: {integrity: sha512-R+33OsgWw7rOhD1emjU7dzCDHucJrgJXMA5PYCzJxVil0dsyx5iBEPHqpPfiKNJQb7lZ1vxwoLR4Z87bBUpeGQ==}
@@ -828,6 +834,10 @@ snapshots:
       '@types/node': 24.1.0
 
   '@types/connect@3.4.38':
+    dependencies:
+      '@types/node': 24.1.0
+
+  '@types/cors@2.8.19':
     dependencies:
       '@types/node': 24.1.0
 

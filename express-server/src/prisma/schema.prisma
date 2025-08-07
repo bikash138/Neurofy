@@ -15,7 +15,8 @@ model User {
 }
 model Note {
   id        String   @id @default(cuid())
-  content   String
+  title     String
+  content   Json?
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())

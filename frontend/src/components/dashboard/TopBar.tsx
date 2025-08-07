@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import { Button } from '../ui/button';
 import { useChatContext } from '@/app/ChatPanelContextProvider';
 import { ChatDrawer } from '../core/ChatDrawer';
+import AddNoteButton from '../ui/AddNoteButton';
 
 const TopBar = () => {
     const { theme, setTheme } = useTheme();
@@ -29,7 +30,7 @@ const TopBar = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="rounded-full w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+            className="rounded-full w-10 h-10 bg-background text-foreground"
           >
             <User className="w-5 h-5" />
           </Button>
@@ -38,7 +39,7 @@ const TopBar = () => {
 
       {/* Search Bar */}
       <div className="relative w-full max-w-md min-w-0 flex-1 md:min-w-[30%] md:flex-none">
-        <Search className="absolute left-3 top-1/4 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
           placeholder="Search in your Neurofy"
           className="pl-10 bg-muted/50 border-0 focus-visible:ring-1 w-full"
@@ -47,6 +48,7 @@ const TopBar = () => {
       
       {/* Icon Section */}
       <div className='flex gap-2'>
+        <AddNoteButton className='md:hidden block'/>
         {
           isDesktop 
           ? (
