@@ -109,7 +109,7 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
     <div className="p-4 border-t border-border flex-shrink-0">
         <div className="flex items-center gap-2">
         <Input
-            placeholder="Message your Mem"
+            placeholder="Message your Neurofy"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
