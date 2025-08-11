@@ -10,6 +10,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
 from langchain_qdrant import QdrantVectorStore
 import os
+import asyncio
 load_dotenv()
 
 app = FastAPI()
@@ -19,21 +20,21 @@ client = OpenAI()
 async def root():
     return {"message": "Hello, World!"}
 
+
+def extract_text(doc):
+    result = []
+
+    for block in doc.get("content",[]):
+        for node in block.get("content",[]):
+            text = node.get("text", '')
+            if text:
+                result.append(text)
+    return ("\n".join(result))
+
+
+
 @app.post("/ai-server")
-async def test_endpoint(data: dict, db:AsyncSession = Depends(get_db)):
-    print("Ingestion Done")
-    return JSONResponse(
-        status_code=201,
-        content={
-            "success": "true",
-            "message": "Embeddings stored in Qdrant successfully",
-            "note_id": data,
-        },
-    )
-
-
-# @app.post("/ai-server")
-# async def convert_to_vector_embeddings(data: dict, db: AsyncSession = Depends(get_db)):
+async def convert_to_vector_embeddings(data: dict, db: AsyncSession = Depends(get_db)):
     try:
         print("Entering to process the note")
         neuroId = data.get("neuroId")
@@ -47,7 +48,10 @@ async def test_endpoint(data: dict, db:AsyncSession = Depends(get_db)):
         if not neuro:
             raise HTTPException(status_code=404, detail="Neuro not found")
         
-        page_content = f"{neuro.title}\n{neuro.content or ''}"
+        print("Extracting Text")
+        plain_text = extract_text(neuro.content)
+        
+        page_content = f"{neuro.title}\n{plain_text or ''}"
 
         document = Document(
             page_content=page_content,
@@ -65,22 +69,28 @@ async def test_endpoint(data: dict, db:AsyncSession = Depends(get_db)):
             model="text-embedding-3-small",
             openai_api_key=os.getenv("OPENAI_API_KEY")
         )
-
-        print("Embedding Done")
+        
         print("Saving to Qdrant")
-        await QdrantVectorStore.from_documents(
-            [document], 
-            embeddings,
-            {
-                "url": "http://localhost:6333",
-                "collection_name": "neurofy", 
-            },
-        )
+        try:
+            QdrantVectorStore.from_documents(
+                [document], 
+                embeddings,
+                url="http://localhost:6333",
+                collection_name="neurofy",
+                vector_name="dense-vector"
+            )
+        except asyncio.TimeoutError:
+            print("Qdrant upsert timed out!")
+            raise HTTPException(status_code=504, detail="Qdrant upsert timed out")
+        except Exception as e:
+            print("Qdrant upsert failed:", e)
+            raise
+
         print("Ingestion Done")
         return JSONResponse(
             status_code=201,
             content={
-                "success": "true",
+                "success": True,
                 "message": "Embeddings stored in Qdrant successfully",
                 "note_id": neuro.id,
             },

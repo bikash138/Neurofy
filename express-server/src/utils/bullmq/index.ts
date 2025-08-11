@@ -9,4 +9,4 @@ const noteTasksQueue = new Queue("neurofy",
 
 export async function enqueueNote(neuroId: string) {
   await noteTasksQueue.add("process-note", { neuroId });
-} 
+}

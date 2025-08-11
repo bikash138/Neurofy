@@ -1,7 +1,6 @@
-import { enqueueNote } from '@/utils/bullmq'
 import { prisma } from '../prisma'
 import express from 'express'
-import { versionQueue } from '@/utils/bullmq/versionQueue'
+import { versionQueue } from '../utils/bullmq/versionQueue'
 export const notesRoute: express.Router = express.Router()
 
 notesRoute.post('/create-note', async (req,res)=>{
@@ -32,8 +31,8 @@ notesRoute.post('/create-note', async (req,res)=>{
 
 notesRoute.put('/update-note/:id', async (req,res)=>{
     try{
-        console.log("Update Request")
         const {id} = req.params
+        console.log("Update Request: ", id)
         const {title,content} = req.body
         await prisma.note.update({
             where:{
@@ -55,9 +54,9 @@ notesRoute.put('/update-note/:id', async (req,res)=>{
         // Schedule a new one for 60s later
         await versionQueue.add(
             "bumpVersion",
-            { id },
+            { neuroId: id },
             {
-                delay: 60000,
+                delay: 10000,
                 jobId: `version:${id}`
             }
         );
