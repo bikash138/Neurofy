@@ -31,7 +31,7 @@ notesRoute.post('/create-note', async (req,res)=>{
 
 notesRoute.put('/update-note/:id', async (req,res)=>{
     try{
-        const {id} = req.params
+        const id = Number(req.params.id);
         console.log("Update Request: ", id)
         const {title,content} = req.body
         await prisma.note.update({
@@ -78,7 +78,7 @@ notesRoute.get('/get-note/:id', async (req,res)=>{
         const {id} = req.params
         const note = await prisma.note.findUnique({
             where:{
-                id: id
+                id: Number(id)
             },
             select:{
                 title: true,

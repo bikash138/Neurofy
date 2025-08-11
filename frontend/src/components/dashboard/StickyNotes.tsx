@@ -25,7 +25,7 @@ export function StickyNotes() {
 
   const router = useRouter();
   const [allNotes, setAllNotes] = useState<NoteType[]>([])
-  const deleteNote = (noteId: string) => {
+  const deleteNote = (noteId: number) => {
     setAllNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId))
   }
 

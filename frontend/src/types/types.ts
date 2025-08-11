@@ -1,5 +1,5 @@
 export interface NoteType {
-  id: string;
+  id: number;
   title: string;
   content: object;
   tags: string[];

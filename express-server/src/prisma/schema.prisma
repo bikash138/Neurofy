@@ -14,7 +14,7 @@ model User {
   createdAt   DateTime @default(now())
 }
 model Note {
-  id                    String    @id @default(cuid())
+  id                    Int    @id @default(autoincrement())
   title                 String
   content               Json?
   userId                String

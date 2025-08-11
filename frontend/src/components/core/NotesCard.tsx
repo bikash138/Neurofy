@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
-const NotesCard = ({ note, deleteNote }: { note: NoteType, deleteNote: (noteId: string)=>void }) => {
+const NotesCard = ({ note, deleteNote }: { note: NoteType, deleteNote: (noteId: number)=>void }) => {
 
   const [isPinning, setIsPinning] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -23,7 +23,7 @@ const NotesCard = ({ note, deleteNote }: { note: NoteType, deleteNote: (noteId: 
     immediatelyRender: false,
   });
 
-  const handlePin = async (noteId: string) => {
+  const handlePin = async (noteId: number) => {
     setIsPinning(true)
     const payload = {
         noteId: noteId,

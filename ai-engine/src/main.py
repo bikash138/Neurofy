@@ -5,32 +5,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from src.db.models import Note
 from src.db.db import get_db
+from src.utils.extract_text import extract_text
 from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
-from langchain_qdrant import QdrantVectorStore
+from langchain_qdrant import FastEmbedSparse, QdrantVectorStore, RetrievalMode
+from qdrant_client import QdrantClient
 import os
-import asyncio
 load_dotenv()
 
 app = FastAPI()
 client = OpenAI()
+client= QdrantClient("localhost", port=6333)
+sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
+
 
 @app.get("/")
 async def root():
     return {"message": "Hello, World!"}
-
-
-def extract_text(doc):
-    result = []
-
-    for block in doc.get("content",[]):
-        for node in block.get("content",[]):
-            text = node.get("text", '')
-            if text:
-                result.append(text)
-    return ("\n".join(result))
-
 
 
 @app.post("/ai-server")
@@ -69,19 +61,27 @@ async def convert_to_vector_embeddings(data: dict, db: AsyncSession = Depends(ge
             model="text-embedding-3-small",
             openai_api_key=os.getenv("OPENAI_API_KEY")
         )
-        
-        print("Saving to Qdrant")
+
+        print("Checking for pre existing Qdrant data")
+        try:
+            client.delete(
+                collection_name="neurofy",
+                points_selector=[neuroId]
+            )
+        except Exception as e:
+            print("Qdrant Cheking failed:", e)
+            raise
+
+        print("Inserting the new embddings")
         try:
             QdrantVectorStore.from_documents(
                 [document], 
                 embeddings,
                 url="http://localhost:6333",
                 collection_name="neurofy",
-                vector_name="dense-vector"
+                vector_name="dense-vector",
+                ids=[neuroId]  
             )
-        except asyncio.TimeoutError:
-            print("Qdrant upsert timed out!")
-            raise HTTPException(status_code=504, detail="Qdrant upsert timed out")
         except Exception as e:
             print("Qdrant upsert failed:", e)
             raise
@@ -96,5 +96,47 @@ async def convert_to_vector_embeddings(data: dict, db: AsyncSession = Depends(ge
             },
         )
     
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/search")
+async def search(data: dict):
+    try:
+        print("Entering the Search Route")
+        embeddings = OpenAIEmbeddings(
+            model="text-embedding-3-small",
+            openai_api_key=os.getenv("OPENAI_API_KEY")
+        )
+        print("Creating qdrant")
+        qdrant = QdrantVectorStore(
+            client=client,
+            collection_name="neurofy",
+            embedding=embeddings,
+            sparse_embedding=sparse_embeddings,
+            retrieval_mode=RetrievalMode.HYBRID,
+            vector_name="dense-vector",
+            sparse_vector_name="sparse-vector",
+        )
+        try:
+            print("Performing Similarity Search")
+            results = qdrant.similarity_search_with_score(data.get("query"))
+        except Exception as e:
+            print("Qdrant search failed:", e)
+            raise
+        print("Vector Search completed")
+        print(results)
+        return JSONResponse(
+            status_code=201,
+            content={
+                "results": [
+                    {
+                        "metadata": doc.metadata,
+                        "page_content": doc.page_content,
+                        "score": score
+                    }
+                    for doc, score in results if score > 0.7
+                ]
+            }
+        ) 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
