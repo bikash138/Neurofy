@@ -25,7 +25,7 @@ const NotePage = ({ noteId, note }: { noteId: string, note: NoteType }) => {
       },
       editorProps: {
       attributes: {
-          spellcheck: 'false',
+        spellcheck: 'false',
       },
       },
       immediatelyRender: false,

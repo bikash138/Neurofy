@@ -93,6 +93,8 @@ async def convert_to_vector_embeddings(data: dict, db: AsyncSession = Depends(ge
                 "success": True,
                 "message": "Embeddings stored in Qdrant successfully",
                 "note_id": neuro.id,
+                "title": neuro.title,
+                "plain_text": plain_text
             },
         )
     

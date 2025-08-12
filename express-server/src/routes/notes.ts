@@ -44,7 +44,7 @@ notesRoute.put('/update-note/:id', async (req,res)=>{
                 last_edited: new Date(),
             }
         })
-
+        
         // Remove old scheduled bump for this note
         const job = await versionQueue.getJob(`version:${id}`);
         if (job) {
@@ -170,3 +170,28 @@ notesRoute.delete('/delete-note', async (req,res)=>{
         })
     }
 })
+
+notesRoute.post('/search', async (req,res)=>{
+    try{
+        const {searchQuery} = req.body
+        const userId = 'cme06ihw800007kz87xrbn7xw'
+        const prefixQuery = `${searchQuery}:*`;
+        const result = await prisma.$queryRaw`
+            SELECT id, title, "contentText"
+            FROM "Note"
+            WHERE "userId" = ${userId}
+              AND "searchVector" @@ to_tsquery('english', ${prefixQuery})
+            ORDER BY ts_rank("searchVector", to_tsquery('english', ${prefixQuery})) DESC
+            `;
+        res.status(200).json({
+            result
+        })
+    }catch(error){
+        console.log(error)
+        res.status(500).json({
+            success:false,
+            message: "Internal Server Error"
+        })
+    }
+})
+

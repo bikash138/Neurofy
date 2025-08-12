@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { useChatContext } from '@/app/ChatPanelContextProvider';
 import { ChatDrawer } from '../core/ChatDrawer';
 import AddNoteButton from '../ui/AddNoteButton';
+import { SearchBar } from '../core/SearchBar';
 
 const TopBar = () => {
     const { theme, setTheme } = useTheme();
@@ -39,11 +40,12 @@ const TopBar = () => {
 
       {/* Search Bar */}
       <div className="relative w-full max-w-md min-w-0 flex-1 md:min-w-[30%] md:flex-none">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+        {/* <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
           placeholder="Search in your Neurofy"
           className="pl-10 bg-muted/50 border-0 focus-visible:ring-1 w-full"
-        />
+        /> */}
+        <SearchBar/>
       </div>
       
       {/* Icon Section */}

@@ -11,19 +11,23 @@ const processNoteWorker = new Worker(
       console.log(`Sending NoteId: ${neuroId} to AI-Server`)
       const response  = await axios.post("http://localhost:8000/ai-server", {neuroId})
       console.log("AI-Engine Response: ", response.data)
+      const {plain_text} = response.data
       if(response.data.success){
-        await prisma.note.update({
-          where: { id: neuroId },
-          data: {
-            needs_ingestion: false,
-            last_ingested_version: { 
-              increment: 1 
-            },
-          }
-        })
-        console.log("")
+        try{
+          console.log("About to update note in DB");
+          await prisma.note.update({
+            where: { id: neuroId },
+            data: {
+              contentText: plain_text,
+              needs_ingestion: false,
+              last_ingested_version: { increment: 1 },
+            }
+          });
+          console.log("Note update completed");
+        }catch(error){
+          console.log("Worker Error at updating Content Text: ", error)
+        }
       }
-
     } catch (error) {
       console.error("Worker error:", error);
     }
