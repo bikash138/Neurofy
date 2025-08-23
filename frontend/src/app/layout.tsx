@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "./ThemeProvider";
+import { Sidebar } from "@/components/dashboard/Sidebar";
+import TopBar from "@/components/dashboard/TopBar";
+import { NotesHeader } from "@/components/dashboard/NotesHeader";
+import { ChatProvider } from "./ChatPanelContextProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +32,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >      
+          <ChatProvider>      
+            <Sidebar/>
+            <TopBar/>
+            {/* <NotesHeader/> */}
+            {children}
+          </ChatProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
