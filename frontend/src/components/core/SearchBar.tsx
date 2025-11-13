@@ -7,6 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { SearchSuggestion } from '@/components/core/SearchSuggestion';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 interface SearchResult {
   id: number;
@@ -34,8 +35,17 @@ export function SearchBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
+  const [semanticResults, setSemanticResult] = useState<SearchResult[]>([])
+  const router = useRouter()
 
   const debouncedQuery = useDebounce(query, 300);
+
+  const mergerdResults = [
+    ...results,
+    ...semanticResults.filter(
+      sem => !results.some(res => res.id === sem.id)
+    )
+  ]
 
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -48,7 +58,6 @@ export function SearchBar() {
     try {
       const response = await axios.post('http://localhost:4000/api/v1/search', {searchQuery})
       const searchResults = response.data.result
-      //@ts-ignore
       setResults(searchResults);
       setIsOpen(true);
       setSelectedIndex(-1);
@@ -66,7 +75,14 @@ export function SearchBar() {
   }, [debouncedQuery, performSearch]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (!isOpen || results.length === 0) return;
+    if (!isOpen || results.length === 0) {
+      // If Enter is pressed and there is a query, trigger semantic search
+      if (e.key === "Enter" && query.trim()) {
+        e.preventDefault();
+        handleSemanticSearch(query);
+      }
+      return;
+    }
 
     switch (e.key) {
       case 'ArrowDown':
@@ -85,6 +101,8 @@ export function SearchBar() {
         e.preventDefault();
         if (selectedIndex >= 0) {
           handleSelect(results[selectedIndex]);
+        } else if (query.trim()) {
+          handleSemanticSearch(query);
         }
         break;
       case 'Escape':
@@ -95,9 +113,8 @@ export function SearchBar() {
   };
 
   const handleSelect = (result: SearchResult) => {
-    console.log('Selected:', result);
-    setQuery(result.title);
-    setIsOpen(false);
+    setIsOpen(false)
+    router.push(`notes/${result.id}`)
     setSelectedIndex(-1);
   };
 
@@ -112,11 +129,28 @@ export function SearchBar() {
   };
 
   const handleInputBlur = () => {
-    // Delay closing to allow for suggestion clicks
     setTimeout(() => {
       setIsOpen(false);
       setSelectedIndex(-1);
     }, 200);
+  };
+
+  const handleSemanticSearch = async (searchQuery: string) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post('http://localhost:8000/search', { query: searchQuery });
+      //@ts-ignore
+      const semanticResults = response.data.results.map(r => ({
+        ...r.metadata,
+        score: r.score
+      }));
+      setSemanticResult(semanticResults)
+      console.log("Merged Results: ", mergerdResults)
+    } catch (error) {
+      console.error('Semantic search error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -166,7 +200,7 @@ export function SearchBar() {
                   title={result.title}
                   subtitle={result.subtitle}
                   isSelected={index === selectedIndex}
-                  onClick={() => handleSelect(result)}
+                  onMouseDown={() => handleSelect(result)}
                   onMouseEnter={() => setSelectedIndex(index)}
                 />
               ))}

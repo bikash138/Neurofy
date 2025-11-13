@@ -6,7 +6,7 @@ interface SearchSuggestionProps {
   title: string;
   subtitle?: string;
   isSelected?: boolean;
-  onClick?: () => void;
+  onMouseDown?: () => void;
   onMouseEnter?: () => void;
 }
 
@@ -15,7 +15,7 @@ export function SearchSuggestion({
   title, 
   subtitle, 
   isSelected, 
-  onClick,
+  onMouseDown,
   onMouseEnter 
 }: SearchSuggestionProps) {
   return (
@@ -27,8 +27,7 @@ export function SearchSuggestion({
         isSelected && "bg-neutral-100 dark:bg-neutral-700",
         "group"
       )}
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
+      onMouseDown={onMouseDown}
     >
       <div className={cn(
         "flex-shrink-0 p-2 rounded-md",
