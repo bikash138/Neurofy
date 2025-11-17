@@ -32,19 +32,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
+        {/* <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-        >      
+        >       */}
           <ChatProvider>      
             <Sidebar/>
             <TopBar/>
             {/* <NotesHeader/> */}
             {children}
           </ChatProvider>
-        </ThemeProvider>
+        {/* </ThemeProvider> */}
       </body>
     </html>
   );

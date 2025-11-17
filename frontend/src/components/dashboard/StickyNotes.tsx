@@ -54,6 +54,7 @@ export function StickyNotes() {
             whileHover={{ scale: 1.02 }}
             className="group"
             onClick={(event) => {
+              //eslint-disable-next-line
               //@ts-ignore
               if (event.target.closest('.hover-icon')) {
                 event.stopPropagation();
