@@ -10,12 +10,17 @@ import { formatDate } from "@/lib/formatDate";
 import { useNoteSync } from "@/hooks/useNoteSync";
 
 const NotePage = ({ noteId, note }: { noteId: string; note: NoteType }) => {
-  // Initialize useNoteSync with JSON content directly
+  // Parse content if it comes as a string from backend
+  const parsedContent =
+    typeof note?.content === "string"
+      ? JSON.parse(note.content)
+      : note?.content || { type: "doc", content: [{ type: "paragraph" }] };
+
   const {
     content: syncedContent,
     updateContent,
     status,
-  } = useNoteSync(noteId, note?.content);
+  } = useNoteSync(noteId, note?.title, parsedContent);
 
   const editor = useEditor({
     extensions: [
@@ -26,7 +31,7 @@ const NotePage = ({ noteId, note }: { noteId: string; note: NoteType }) => {
           "text-muted-foreground before:content-[attr(data-placeholder)] before:absolute before:opacity-50 before:text-base before:text-gray-400 before:font-normal before:pl-[0.25rem]",
       }),
     ],
-    content: syncedContent, // Direct JSON, no conversion needed
+    content: syncedContent, // Parse if needed
     onUpdate({ editor }) {
       debouncedSave();
     },
@@ -38,7 +43,7 @@ const NotePage = ({ noteId, note }: { noteId: string; note: NoteType }) => {
     immediatelyRender: false,
   });
 
-  // Update editor when syncedContent changes (e.g., after loading pending draft)
+  // Update editor when syncedContent changes
   useEffect(() => {
     if (editor && syncedContent) {
       editor.commands.setContent(syncedContent);
@@ -52,32 +57,16 @@ const NotePage = ({ noteId, note }: { noteId: string; note: NoteType }) => {
   }, [note?.title]);
 
   const saveNote = async () => {
-    console.log("Entering into Saving Note")
+    console.log("Entering into Saving Note");
     if (!editor) return;
 
     const content = editor.getJSON(); // TipTap JSON
     const title = titleRef.current?.innerText || "Untitled";
 
     // Use useNoteSync's updateContent for content (handles offline/local storage)
-    console.log("Calling the Index DB HOOK")
     //eslint-disable-next-line
     //@ts-ignore
-    await updateContent(content);
-
-    // Save title separately
-    // try {
-    //   const payload = {
-    //     content: content,
-    //     title: title,
-    //   };
-    //   const response = await axios.put(
-    //     `http://localhost:4000/api/v1/update-note/${noteId}`,
-    //     payload
-    //   );
-    //   console.log(response.data?.message);
-    // } catch (err) {
-    //   console.error("Failed to save title:", err);
-    // }
+    await updateContent(title, content);
   };
 
   const debouncedSave = debounce(saveNote, 1000);

@@ -10,6 +10,7 @@ export async function syncPendingNotes(backoff = 1000): Promise<void> {
       const res = await axios.put(
         `http://localhost:4000/api/v1/update-note/${note.noteId}`,
         {
+          title: note.title,
           content: note.content,
         }
       );

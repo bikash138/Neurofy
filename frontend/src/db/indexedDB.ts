@@ -2,6 +2,7 @@ import Dexie, { Table } from "dexie";
 
 export interface PendingNote {
   noteId: string;
+  title: string;
   content: JSON;
   updatedAt: number;
 }
@@ -19,18 +20,19 @@ export class NeurofyDB extends Dexie {
 
 export const db = new NeurofyDB();
 
-export async function savePendingNote(noteId: string, content: JSON) {
+export async function savePendingNote(noteId: string, title: string, content: JSON) {
   await db.pendingNotes.put({
     noteId,
+    title,
     content,
     updatedAt: Date.now(),
   });
 }
 
-export async function removePendingNote(noteId: string) {
-  await db.pendingNotes.delete(noteId);
+export async function removePendingNote(noteId: string){
+  await db.pendingNotes.delete(noteId)
 }
 
-export async function getAllPendingNotes() {
+export async function getAllPendingNotes(){
   return await db.pendingNotes.toArray();
 }

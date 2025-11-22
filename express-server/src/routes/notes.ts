@@ -5,13 +5,13 @@ export const notesRoute: express.Router = express.Router()
 
 notesRoute.post('/create-note', async (req,res)=>{
     try{
-        const { title } = req.body
-        const newNeuro = await prisma.note.create({
-            data: {
-                title: title,
-                userId: 'cme06ihw800007kz87xrbn7xw'
-            }
-        })
+      const { title } = req.body
+      const newNeuro = await prisma.note.create({
+        data: {
+            title: title,
+            userId: 'cme06ihw800007kz87xrbn7xw'
+        }
+      })
         
         const neuroId = newNeuro.id
 
@@ -34,32 +34,34 @@ notesRoute.put('/update-note/:id', async (req,res)=>{
         const id = Number(req.params.id);
         console.log("Update Request: ", id)
         const {title,content} = req.body
+        console.log("Title: ", title);
+        console.log("Content: ", content);
         await prisma.note.update({
             where:{
-                id: id
+              id: id
             },
             data: {
-                title: title,
-                content: content,
-                last_edited: new Date(),
+              title: title,
+              content: content,
+              last_edited: new Date(),
             }
         })
         
         // Remove old scheduled bump for this note
-        const job = await versionQueue.getJob(`version:${id}`);
-        if (job) {
-            await job.remove();
-        }
+        // const job = await versionQueue.getJob(`version:${id}`);
+        // if (job) {
+        //     await job.remove();
+        // }
 
         // Schedule a new one for 60s later
-        await versionQueue.add(
-            "bumpVersion",
-            { neuroId: id },
-            {
-                delay: 10000,
-                jobId: `version:${id}`
-            }
-        );
+        // await versionQueue.add(
+        //     "bumpVersion",
+        //     { neuroId: id },
+        //     {
+        //         delay: 10000,
+        //         jobId: `version:${id}`
+        //     }
+        // );
         return res.status(200).json({
             success: true,
             message: "Update success"
