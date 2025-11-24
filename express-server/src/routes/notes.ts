@@ -1,4 +1,4 @@
-import { prisma } from '../prisma'
+import {prisma} from '../lib/prisma'
 import express from 'express'
 import { versionQueue } from '../utils/bullmq/versionQueue'
 export const notesRoute: express.Router = express.Router()

@@ -13,7 +13,7 @@ voiceNoteRoute.post('/upload-voice-note', async (req, res) => {
         message: "User ID is Missing"
       })
     }
-    const Key = `${userId}/${Date.now()}.webm`
+    const Key = `${userId}/voice-note/${Date.now()}.webm`
 
     const command = new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,
@@ -24,10 +24,13 @@ voiceNoteRoute.post('/upload-voice-note', async (req, res) => {
     const preSignedUrl = await getSignedUrl(S3, command, {
       expiresIn: 360
     })
+    const bucket = process.env.S3_BUCKET_NAME!;
+    const permanentUrl = `https://${bucket}.fly.storage.tigris.dev/${userId}/voice-notes/${Key}`
 
     return res.status(200).json({
       success: true,
       message: "Pre-signed URL generated successfully",
+      permanentUrl,
       preSignedUrl
     })
   } catch (error) {
