@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import TopBar from "@/components/dashboard/TopBar";
 import { NotesHeader } from "@/components/dashboard/NotesHeader";
 import { ChatProvider } from "./ChatPanelContextProvider";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
             <TopBar/>
             {/* <NotesHeader/> */}
             {children}
+            <Toaster/>
           </ChatProvider>
         {/* </ThemeProvider> */}
       </body>
