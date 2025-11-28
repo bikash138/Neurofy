@@ -7,6 +7,16 @@ export interface NoteType {
   createdAt?: string;
   updatedAt: string;
 }
-export interface AllNotesProps {
+export interface AllNotesProps { 
   allNotes: NoteType[]
+}
+
+export interface VoiceNoteType {
+  id: string;
+  title: string;
+  url: string;
+  pinned: boolean;
+}
+export interface VoiceNotesProps {
+  voiceNotes: VoiceNoteType[]
 }
