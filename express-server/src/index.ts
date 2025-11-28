@@ -1,6 +1,10 @@
 import express from 'express'
+import dotenv from 'dotenv'
+dotenv.config()
 import { notesRoute } from './routes/notes'
 import cors from 'cors'
+import { voiceUploadS3 } from "./routes/s3/voiceUpload";
+import { voiceNotesRoute } from './routes/voice-nots'
 
 const app = express()
 
@@ -8,6 +12,8 @@ app.use(express.json())
 app.use(cors())
 
 app.use('/api/v1', notesRoute)
+app.use('/api/v1', voiceUploadS3)
+app.use('/api/v1', voiceNotesRoute)
 
 
 

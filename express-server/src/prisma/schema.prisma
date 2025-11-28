@@ -1,34 +1,47 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
+
 model User {
-  id          String  @id @default(cuid())
-  clerkId     String  @unique
-  email       String
-  notes       Note[]
-  createdAt   DateTime @default(now())
+  id         String      @id @default(cuid())
+  clerkId    String      @unique
+  email      String
+  notes      Note[]
+  voiceNotes VoiceNote[]
+  createdAt  DateTime    @default(now())
 }
+
 model Note {
-  id                    Int    @id @default(autoincrement())
+  id                    Int                      @id @default(autoincrement())
   title                 String
   content               Json?
   userId                String
-  pinned                Boolean   @default(false)
+  pinned                Boolean                  @default(false)
   tags                  String[]
   contentText           String?
-  last_edited           DateTime  @default(now())
-  version               Int       @default(1)
-  last_ingested_version Int       @default(0)
-  needs_ingestion       Boolean   @default(false)
+  last_edited           DateTime                 @default(now())
+  version               Int                      @default(1)
+  last_ingested_version Int                      @default(0)
+  needs_ingestion       Boolean                  @default(false)
   searchVector          Unsupported("tsvector")?
-  user                  User      @relation(fields: [userId], references: [id])
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt @default(now())
+  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @default(now()) @updatedAt
 }
 
-
+model VoiceNote {
+  id              String   @id @default(uuid())
+  title           String   @default("Untitled")
+  url             String
+  userId          String
+  pinned          Boolean  @default(false)
+  tags            String[]
+  needs_ingestion Boolean  @default(false)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+}

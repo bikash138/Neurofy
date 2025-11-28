@@ -1,4 +1,4 @@
-import { prisma } from "../../prisma";
+import { prisma } from "../../lib/prisma";
 import { Queue, Worker } from "bullmq";
 import { enqueueNote } from ".";
 
@@ -13,7 +13,7 @@ export const versionWorker = new Worker("version", async (job)=>{
         console.log("Updating the version and Ingestion flag", neuroId)
         await prisma.note.update({
             where: { id: neuroId },
-            data: { 
+        data: { 
                 version: { 
                     increment: 1 
                 },

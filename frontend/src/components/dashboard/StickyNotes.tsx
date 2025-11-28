@@ -1,8 +1,9 @@
 'use client';
 import { motion } from 'framer-motion';
 import NotesCard from '../core/NotesCard';
+import VoiceNoteCard from '../core/VoiceNoteCard';
 import { useRouter } from 'next/navigation';
-import { AllNotesProps, NoteType } from '@/types/types';
+import { AllNotesProps, NoteType, VoiceNotesProps, VoiceNoteType } from '@/types/types';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -11,8 +12,13 @@ export function StickyNotes() {
   const fetchNotes = async () => {
     try{
       const response = await axios.get('http://localhost:4000/api/v1/get-all-note')
+      const responseVoiceNotes = await axios.get('http://localhost:4000/api/v1/get-all-voice-notes')
       const initialNotes: AllNotesProps['allNotes']= response.data?.allNotes
+      const initialVoiceNotes: VoiceNotesProps['voiceNotes']=
+        responseVoiceNotes.data?.voiceNotes;
+      console.log("initialVoiceNotes", initialVoiceNotes)
       setAllNotes(initialNotes)
+      setAllVoiceNotes(initialVoiceNotes)
     }catch(error){
       console.log(error)
       console.log("Failed to get all notes")
@@ -25,11 +31,10 @@ export function StickyNotes() {
 
   const router = useRouter();
   const [allNotes, setAllNotes] = useState<NoteType[]>([])
+  const [allVoiceNotes, setAllVoiceNotes] = useState<VoiceNoteType[]>([])
   const deleteNote = (noteId: number) => {
     setAllNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId))
   }
-
-  
 
   return (
     <div className="pr-3">
@@ -40,6 +45,20 @@ export function StickyNotes() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-1 auto-rows-auto">
+        {/* Demo Voice Note Card */}
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="group space-y-2"
+        >
+          {
+            allVoiceNotes.map((voiceNote)=>(
+              <VoiceNoteCard key={voiceNote.id} audioUrl={voiceNote.url}/>
+            ))
+          }
+        </motion.div>
+
         {allNotes.map((note, index) => (
           <motion.div
             key={note.id}
