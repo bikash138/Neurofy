@@ -1,7 +1,7 @@
-'use client';
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause } from 'lucide-react';
-import { cn } from '@/lib/utils';
+'use client'
+import React, { useState, useEffect, useRef } from "react";
+import { Play, Pause } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface VoiceNoteCardProps {
   audioUrl?: string; // URL to the audio file
@@ -18,18 +18,20 @@ const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
   const [progress, setProgress] = useState(0); // 0 to 100
   const [currentTime, setCurrentTime] = useState(0); // Current time in seconds
   const [duration, setDuration] = useState(totalDuration || 0);
-  
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Mock waveform bars (static for now, could be dynamic if we analyze audio data)
-  const [bars] = useState(() => Array.from({ length: 40 }, () => Math.floor(Math.random() * 40) + 10));
+  const [bars] = useState(() =>
+    Array.from({ length: 40 }, () => Math.floor(Math.random() * 40) + 10)
+  );
 
   // Format time helper (MM:SS)
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   useEffect(() => {
@@ -48,24 +50,24 @@ const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
 
-    audio.addEventListener('timeupdate', () => {
+    audio.addEventListener("timeupdate", () => {
       setCurrentTime(audio.currentTime);
       if (audio.duration && !isNaN(audio.duration)) {
         setProgress((audio.currentTime / audio.duration) * 100);
       }
     });
 
-    audio.addEventListener('ended', () => {
+    audio.addEventListener("ended", () => {
       setIsPlaying(false);
       setCurrentTime(0);
       setProgress(0);
     });
 
     // If we didn't have a duration prop, update it now
-    audio.addEventListener('loadedmetadata', () => {
-        if (!totalDuration) {
-            setDuration(audio.duration);
-        }
+    audio.addEventListener("loadedmetadata", () => {
+      if (!totalDuration) {
+        setDuration(audio.duration);
+      }
     });
   };
 
@@ -83,16 +85,18 @@ const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
     if (isPlaying) {
       audio.pause();
     } else {
-      audio.play().catch(e => console.error("Playback failed:", e));
+      audio.play().catch((e) => console.error("Playback failed:", e));
     }
     setIsPlaying(!isPlaying);
   };
 
   return (
-    <div className={cn(
+    <div
+      className={cn(
         "w-full max-w-md p-4 rounded-2xl border shadow-sm transition-all duration-300 select-none",
         "bg-card dark:bg-card border-gray-200 dark:border-zinc-700 hover:shadow-md"
-    )}>
+      )}
+    >
       <div className="flex items-center gap-4">
         {/* Play/Pause Button */}
         <button
@@ -113,22 +117,22 @@ const VoiceNoteCard: React.FC<VoiceNoteCardProps> = ({
 
         {/* Waveform & Progress */}
         <div className="flex-1 flex flex-col justify-center h-10 relative">
-            <div className="flex items-center gap-[3px] h-full overflow-hidden items-end">
-                {bars.map((height, index) => {
-                    const barProgress = (index / bars.length) * 100;
-                    const isPlayed = barProgress < progress;
-                    return (
-                        <div
-                            key={index}
-                            className={cn(
-                                "w-[3px] rounded-full transition-colors duration-200",
-                                isPlayed ? "bg-primary" : "bg-muted-foreground/30"
-                            )}
-                            style={{ height: `${height}%` }}
-                        />
-                    );
-                })}
-            </div>
+          <div className="flex items-center gap-[3px] h-full overflow-hidden items-end">
+            {bars.map((height, index) => {
+              const barProgress = (index / bars.length) * 100;
+              const isPlayed = barProgress < progress;
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    "w-[3px] rounded-full transition-colors duration-200",
+                    isPlayed ? "bg-primary" : "bg-muted-foreground/30"
+                  )}
+                  style={{ height: `${height}%` }}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
 

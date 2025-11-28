@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../node_modules/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -35,9 +35,13 @@ model Note {
 }
 
 model VoiceNote {
-  id        String   @id @default(uuid())
-  url       String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id              String   @id @default(uuid())
+  title           String   @default("Untitled")
+  url             String
+  userId          String
+  pinned          Boolean  @default(false)
+  tags            String[]
+  needs_ingestion Boolean  @default(false)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
 }

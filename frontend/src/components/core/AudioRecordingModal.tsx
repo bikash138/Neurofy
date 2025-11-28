@@ -5,34 +5,30 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 type Props = {
   open: boolean;
   onClose: () => void;
 };
 
-export default function AudioRecordingModal({
-  open,
-  onClose,
-}: Props) {
-
+export default function AudioRecordingModal({ open, onClose }: Props) {
   if (!open) return null;
 
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  
+
   const chunks = useRef<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [seconds, setSeconds] = useState(0)
-  const timeRef = useRef<NodeJS.Timeout | null>(null)
+  const [seconds, setSeconds] = useState(0);
+  const timeRef = useRef<NodeJS.Timeout | null>(null);
 
   const cleanupStream = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
   }, []);
@@ -52,20 +48,20 @@ export default function AudioRecordingModal({
 
   const startTimer = () => {
     timeRef.current = setInterval(() => {
-      setSeconds(seconds => seconds + 1)
-    }, 1000)
-  }
-  
+      setSeconds((seconds) => seconds + 1);
+    }, 1000);
+  };
+
   const stopTimer = () => {
     if (!timeRef.current) return;
-    clearInterval(timeRef.current);  
-    timeRef.current = null;       
+    clearInterval(timeRef.current);
+    timeRef.current = null;
   };
 
   const resetTimer = () => {
     stopTimer();
     setSeconds(0);
-  }
+  };
 
   const minutes = Math.floor(seconds / 60);
   const displaySeconds = seconds % 60;
@@ -81,7 +77,7 @@ export default function AudioRecordingModal({
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       const recorder = new MediaRecorder(stream);
-      
+
       chunks.current = [];
 
       recorder.ondataavailable = (e) => chunks.current.push(e.data);
@@ -101,7 +97,7 @@ export default function AudioRecordingModal({
       startTimer();
     } catch (err) {
       console.error("Error accessing microphone:", err);
-      toast.error("Error accessing microphone")
+      toast.error("Error accessing microphone");
     }
   };
 
@@ -122,26 +118,43 @@ export default function AudioRecordingModal({
   const saveRecording = async () => {
     if (!audioBlob) return;
     setIsUploading(true);
-    
-    try{
-      const response = await axios.post("http://localhost:4000/api/v1/upload-voice-note", {
-        userId: 'firstUser',
-      });
-      if(!response.data?.success){
-        throw new Error(response.data.message)
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/v1/upload-voice-note",
+        {
+          userId: "cme06ihw800007kz87xrbn7xw",
+        }
+      );
+      if (!response.data?.success) {
+        throw new Error(response.data.message);
       }
-      const {preSignedUrl} = response.data
+      const { preSignedUrl, permanentUrl } = response.data;
       await axios.put(preSignedUrl, audioBlob, {
         headers: {
           "Content-Type": "audio/webm",
         },
-      })
-      toast.success("Audio uploaded successfully")
-      console.log("Audio uploaded successfully");
+      });
+
+      // Save to Database
+      const dbResponse = await axios.post(
+        "http://localhost:4000/api/v1/create-voice-note",
+        {
+          title: "Untitled",
+          url: permanentUrl, 
+          pinned: false,
+        }
+      );
+
+      if (!dbResponse.data?.success) {
+        throw new Error("Failed to save note to database");
+      }
+
+      toast.success("Audio uploaded successfully");
       handleClose();
-    }catch(err){
-      console.log(err)
-      toast.error("Something went wrong while uploading the audio")
+    } catch (err) {
+      console.log(err);
+      toast.error("Something went wrong while uploading the audio");
     } finally {
       setIsUploading(false);
     }
@@ -174,7 +187,6 @@ export default function AudioRecordingModal({
         </div>
 
         <div className="p-6 flex flex-col items-center gap-6">
-          
           {/* Visualizer / Status */}
           <div className="relative flex items-center justify-center w-32 h-32">
             {isRecording && (
@@ -185,16 +197,21 @@ export default function AudioRecordingModal({
                 transition={{ duration: 1.5, repeat: Infinity }}
               />
             )}
-            
-            <div className={cn(
-              "relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300",
-              isRecording ? "bg-red-500 text-white shadow-red-500/50 shadow-lg" : 
-              audioBlob ? "bg-primary text-primary-foreground shadow-lg" : "bg-muted text-muted-foreground"
-            )}>
+
+            <div
+              className={cn(
+                "relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300",
+                isRecording
+                  ? "bg-red-500 text-white shadow-red-500/50 shadow-lg"
+                  : audioBlob
+                  ? "bg-primary text-primary-foreground shadow-lg"
+                  : "bg-muted text-muted-foreground"
+              )}
+            >
               {isUploading ? (
                 <Loader2 className="w-8 h-8 animate-spin" />
               ) : isRecording ? (
-                <div className="w-8 h-8 rounded-sm bg-white animate-pulse" /> 
+                <div className="w-8 h-8 rounded-sm bg-white animate-pulse" />
               ) : audioBlob ? (
                 <Play className="w-8 h-8 ml-1" />
               ) : (
@@ -209,7 +226,13 @@ export default function AudioRecordingModal({
               {formatTime()}
             </div>
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
-              {isUploading ? "Uploading..." : isRecording ? "Recording..." : audioBlob ? "Review Recording" : "Ready to Record"}
+              {isUploading
+                ? "Uploading..."
+                : isRecording
+                ? "Recording..."
+                : audioBlob
+                ? "Review Recording"
+                : "Ready to Record"}
             </p>
           </div>
 
@@ -223,26 +246,48 @@ export default function AudioRecordingModal({
           {/* Controls */}
           <div className="flex items-center gap-3 w-full">
             {!isRecording && !audioBlob && (
-              <Button className="w-full" size="lg" onClick={startRecording} disabled={isUploading}>
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={startRecording}
+                disabled={isUploading}
+              >
                 <Mic className="w-4 h-4 mr-2" /> Start Recording
               </Button>
             )}
 
             {isRecording && (
-              <Button variant="destructive" className="w-full" size="lg" onClick={stopRecording}>
+              <Button
+                variant="destructive"
+                className="w-full"
+                size="lg"
+                onClick={stopRecording}
+              >
                 <Square className="w-4 h-4 mr-2 fill-current" /> Stop Recording
               </Button>
             )}
 
             {!isRecording && audioBlob && (
               <>
-                <Button variant="outline" size="lg" className="flex-1" onClick={discardRecording} disabled={isUploading}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="flex-1"
+                  onClick={discardRecording}
+                  disabled={isUploading}
+                >
                   <Trash2 className="w-4 h-4 mr-2" /> Discard
                 </Button>
-                <Button size="lg" className="flex-1" onClick={saveRecording} disabled={isUploading}>
+                <Button
+                  size="lg"
+                  className="flex-1"
+                  onClick={saveRecording}
+                  disabled={isUploading}
+                >
                   {isUploading ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
+                      Saving...
                     </>
                   ) : (
                     <>
@@ -258,4 +303,3 @@ export default function AudioRecordingModal({
     </div>
   );
 }
-

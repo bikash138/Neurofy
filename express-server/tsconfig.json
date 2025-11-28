@@ -12,15 +12,12 @@
     "paths": {
       "@/*": [
         "*"
-      ],
-      "@prisma/client": [
-        "../node_modules/generated/prisma"
       ]
     },
     "types": [],
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
+    "declarationMap": false,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "strict": true,
@@ -34,7 +31,6 @@
   },
   "include": [
     "src",
-    "prisma"
   ],
   "exclude": [
     "node_modules",

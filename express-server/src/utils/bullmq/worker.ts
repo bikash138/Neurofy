@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../lib/prisma"
 import axios from "axios";
 import { Worker } from "bullmq";
 console.log("Neurofy Worker is Listening")

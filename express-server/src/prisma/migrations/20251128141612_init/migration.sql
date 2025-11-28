@@ -31,8 +31,12 @@ CREATE TABLE "Note" (
 -- CreateTable
 CREATE TABLE "VoiceNote" (
     "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL DEFAULT 'Untitled',
     "url" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
+    "pinned" BOOLEAN NOT NULL DEFAULT false,
+    "tags" TEXT[],
+    "needs_ingestion" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "VoiceNote_pkey" PRIMARY KEY ("id")
@@ -42,7 +46,7 @@ CREATE TABLE "VoiceNote" (
 CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
 
 -- AddForeignKey
-ALTER TABLE "Note" ADD CONSTRAINT "Note_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Note" ADD CONSTRAINT "Note_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "VoiceNote" ADD CONSTRAINT "VoiceNote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "VoiceNote" ADD CONSTRAINT "VoiceNote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

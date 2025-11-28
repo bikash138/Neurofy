@@ -13,6 +13,7 @@ export function StickyNotes() {
     try{
       const response = await axios.get('http://localhost:4000/api/v1/get-all-note')
       const initialNotes: AllNotesProps['allNotes']= response.data?.allNotes
+      console.log(initialNotes)
       setAllNotes(initialNotes)
     }catch(error){
       console.log(error)
