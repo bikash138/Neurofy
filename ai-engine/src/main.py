@@ -11,6 +11,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
 from langchain_qdrant import FastEmbedSparse, QdrantVectorStore, RetrievalMode
 from qdrant_client import QdrantClient
+from fastapi.middleware.cors import CORSMiddleware
 import os
 load_dotenv()
 
@@ -18,6 +19,14 @@ app = FastAPI()
 client = OpenAI()
 client= QdrantClient("localhost", port=6333)
 sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -133,10 +142,9 @@ async def search(data: dict):
                 "results": [
                     {
                         "metadata": doc.metadata,
-                        "page_content": doc.page_content,
                         "score": score
                     }
-                    for doc, score in results if score > 0.7
+                    for doc, score in results
                 ]
             }
         ) 

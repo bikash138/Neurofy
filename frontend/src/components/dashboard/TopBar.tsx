@@ -14,14 +14,14 @@ const TopBar = () => {
     const { isChatOpen, setIsChatOpen, toggleChat } = useChatContext();
     const [isDesktop, setIsDesktop] = useState(false);
     useEffect(() => {
-        const checkScreenSize = () => {
-          setIsDesktop(window.innerWidth >= 768); // md breakpoint
-        };
-    
-        checkScreenSize();
-        window.addEventListener("resize", checkScreenSize);
-        return () => window.removeEventListener("resize", checkScreenSize);
-      }, []);
+      const checkScreenSize = () => {
+        setIsDesktop(window.innerWidth >= 768); // md breakpoint
+      };
+  
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+      return () => window.removeEventListener("resize", checkScreenSize);
+    }, []);
     return (
     <div className="fixed top-0 left-0 md:left-16 right-0 h-16 bg-background border-b border-border flex items-center justify-between gap-x-2 z-40 px-3 md:px-6">
 

@@ -1,5 +1,0 @@
--- AlterTable
-ALTER TABLE "public"."Note" ADD COLUMN     "last_edited" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "last_ingested_version" INTEGER NOT NULL DEFAULT 0,
-ADD COLUMN     "needs_ingestion" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "version" INTEGER NOT NULL DEFAULT 1;
