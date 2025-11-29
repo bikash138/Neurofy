@@ -1,40 +1,61 @@
-'use client';
-import { motion } from 'framer-motion';
-import NotesCard from '../core/NotesCard';
-import VoiceNoteCard from '../core/VoiceNoteCard';
-import { useRouter } from 'next/navigation';
-import { AllNotesProps, NoteType, VoiceNotesProps, VoiceNoteType } from '@/types/types';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+"use client";
+import { motion } from "framer-motion";
+import NotesCard from "../core/NotesCard";
+import VoiceNoteCard from "../core/VoiceNoteCard";
+import { useRouter } from "next/navigation";
+import {
+  AllNotesProps,
+  NoteType,
+  VoiceNotesProps,
+  VoiceNoteType,
+} from "@/types/types";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useAuth } from "@clerk/nextjs";
 
 export function StickyNotes() {
+  const { getToken } = useAuth();
+  const router = useRouter();
+  const [allNotes, setAllNotes] = useState<NoteType[]>([]);
+  const [allVoiceNotes, setAllVoiceNotes] = useState<VoiceNoteType[]>([]);
 
   const fetchNotes = async () => {
-    try{
-      const response = await axios.get('http://localhost:4000/api/v1/get-all-note')
-      const responseVoiceNotes = await axios.get('http://localhost:4000/api/v1/get-all-voice-notes')
-      const initialNotes: AllNotesProps['allNotes']= response.data?.allNotes
-      const initialVoiceNotes: VoiceNotesProps['voiceNotes']=
+    try {
+      const token = await getToken();
+      const response = await axios.get(
+        "http://localhost:4000/api/v1/get-all-note",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const responseVoiceNotes = await axios.get(
+        "http://localhost:4000/api/v1/get-all-voice-notes",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const initialNotes: AllNotesProps["allNotes"] = response.data?.allNotes;
+      const initialVoiceNotes: VoiceNotesProps["voiceNotes"] =
         responseVoiceNotes.data?.voiceNotes;
-      console.log("initialVoiceNotes", initialVoiceNotes)
-      setAllNotes(initialNotes)
-      setAllVoiceNotes(initialVoiceNotes)
-    }catch(error){
-      console.log(error)
-      console.log("Failed to get all notes")
+      setAllNotes(initialNotes);
+      setAllVoiceNotes(initialVoiceNotes);
+    } catch (error) {
+      console.log(error);
+      console.log("Failed to get all notes");
     }
-  }
+  };
 
-  useEffect(()=>{
-    fetchNotes()
-  },[])
+  useEffect(() => {
+    fetchNotes();
+  }, []);
 
-  const router = useRouter();
-  const [allNotes, setAllNotes] = useState<NoteType[]>([])
-  const [allVoiceNotes, setAllVoiceNotes] = useState<VoiceNoteType[]>([])
   const deleteNote = (noteId: number) => {
-    setAllNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId))
-  }
+    setAllNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+  };
 
   return (
     <div className="pr-3">
@@ -47,16 +68,14 @@ export function StickyNotes() {
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-1 auto-rows-auto">
         {/* Demo Voice Note Card */}
         <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="group space-y-2"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="group space-y-2"
         >
-          {
-            allVoiceNotes.map((voiceNote)=>(
-              <VoiceNoteCard key={voiceNote.id} audioUrl={voiceNote.url}/>
-            ))
-          }
+          {allVoiceNotes.map((voiceNote) => (
+            <VoiceNoteCard key={voiceNote.id} audioUrl={voiceNote.url} />
+          ))}
         </motion.div>
 
         {allNotes.map((note, index) => (
@@ -66,7 +85,7 @@ export function StickyNotes() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{
               delay: index * 0.1,
-              type: 'spring',
+              type: "spring",
               stiffness: 260,
               damping: 20,
             }}
@@ -75,14 +94,14 @@ export function StickyNotes() {
             onClick={(event) => {
               //eslint-disable-next-line
               //@ts-ignore
-              if (event.target.closest('.hover-icon')) {
+              if (event.target.closest(".hover-icon")) {
                 event.stopPropagation();
               } else {
                 router.push(`/notes/${note.id}`);
               }
             }}
           >
-            <NotesCard note={note} deleteNote={deleteNote}/>
+            <NotesCard note={note} deleteNote={deleteNote} />
           </motion.div>
         ))}
       </div>

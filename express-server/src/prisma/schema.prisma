@@ -29,7 +29,7 @@ model Note {
   last_ingested_version Int                      @default(0)
   needs_ingestion       Boolean                  @default(false)
   searchVector          Unsupported("tsvector")?
-  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User                     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @default(now()) @updatedAt
 }
@@ -42,6 +42,6 @@ model VoiceNote {
   pinned          Boolean  @default(false)
   tags            String[]
   needs_ingestion Boolean  @default(false)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
   createdAt       DateTime @default(now())
 }

@@ -2,11 +2,12 @@ import express from 'express'
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { S3 } from '../../utils/s3Client';
+import { getAuth } from '@clerk/express';
 export const voiceUploadS3: express.Router = express.Router()
 
 voiceUploadS3.post("/upload-voice-note", async (req, res) => {
   try {
-    const userId = req.body.userId;
+    const { userId } = getAuth(req);
     if (!userId) {
       return res.status(400).json({
         success: false,

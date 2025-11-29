@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "sonner";
+import { useAuth } from "@clerk/nextjs";
 
 type Props = {
   open: boolean;
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export default function AudioRecordingModal({ open, onClose }: Props) {
+  const { getToken } = useAuth();
   if (!open) return null;
 
   const [isRecording, setIsRecording] = useState(false);
@@ -120,10 +122,14 @@ export default function AudioRecordingModal({ open, onClose }: Props) {
     setIsUploading(true);
 
     try {
+      const token = await getToken();
       const response = await axios.post(
         "http://localhost:4000/api/v1/upload-voice-note",
+        {},
         {
-          userId: "cme06ihw800007kz87xrbn7xw",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       if (!response.data?.success) {
@@ -141,8 +147,13 @@ export default function AudioRecordingModal({ open, onClose }: Props) {
         "http://localhost:4000/api/v1/create-voice-note",
         {
           title: "Untitled",
-          url: permanentUrl, 
+          url: permanentUrl,
           pinned: false,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
