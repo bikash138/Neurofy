@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import { voiceNoteService } from "@/services/voiceNoteService";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
 
@@ -15,7 +15,6 @@ type Props = {
 
 export default function AudioRecordingModal({ open, onClose }: Props) {
   const { getToken } = useAuth();
-  if (!open) return null;
 
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -42,6 +41,8 @@ export default function AudioRecordingModal({ open, onClose }: Props) {
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
   }, [audioUrl, cleanupStream]);
+
+  if (!open) return null;
 
   const handleClose = () => {
     cleanupStream();
@@ -123,41 +124,29 @@ export default function AudioRecordingModal({ open, onClose }: Props) {
 
     try {
       const token = await getToken();
-      const response = await axios.post(
-        "http://localhost:4000/api/v1/upload-voice-note",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.data?.success) {
-        throw new Error(response.data.message);
+      if (!token) {
+        toast.error("You must be logged in to save recordings");
+        return;
       }
-      const { preSignedUrl, permanentUrl } = response.data;
-      await axios.put(preSignedUrl, audioBlob, {
-        headers: {
-          "Content-Type": "audio/webm",
-        },
-      });
+
+      const uploadData = await voiceNoteService.getUploadUrl(token);
+
+      if (!uploadData.success) {
+        throw new Error(uploadData.message);
+      }
+
+      const { preSignedUrl, permanentUrl } = uploadData;
+
+      await voiceNoteService.uploadToS3(preSignedUrl, audioBlob);
 
       // Save to Database
-      const dbResponse = await axios.post(
-        "http://localhost:4000/api/v1/create-voice-note",
-        {
-          title: "Untitled",
-          url: permanentUrl,
-          pinned: false,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const dbResponse = await voiceNoteService.createVoiceNote(token, {
+        title: "Untitled",
+        url: permanentUrl,
+        pinned: false,
+      });
 
-      if (!dbResponse.data?.success) {
+      if (!dbResponse.success) {
         throw new Error("Failed to save note to database");
       }
 

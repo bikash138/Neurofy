@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
 import { SearchSuggestion } from "@/components/core/SearchSuggestion";
 import { cn } from "@/lib/utils";
-import axios from "axios";
+import { searchService } from "@/services/searchService";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 
@@ -64,16 +64,9 @@ export function SearchBar() {
       setIsLoading(true);
       try {
         const token = await getToken();
-        const response = await axios.post(
-          "http://localhost:4000/api/v1/search",
-          { searchQuery },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const searchResults = response.data.result;
+        if (!token) return;
+        const data = await searchService.searchNotes(token, searchQuery);
+        const searchResults = data.result;
         setResults(searchResults);
         setIsOpen(true);
         setSelectedIndex(-1);
@@ -152,11 +145,9 @@ export function SearchBar() {
   const handleSemanticSearch = async (searchQuery: string) => {
     try {
       setIsLoading(true);
-      const response = await axios.post("http://localhost:8000/search", {
-        query: searchQuery,
-      });
+      const data = await searchService.semanticSearch(searchQuery);
       //@ts-ignore
-      const semanticResults = response.data.results.map((r) => ({
+      const semanticResults = data.results.map((r) => ({
         ...r.metadata,
         score: r.score,
       }));

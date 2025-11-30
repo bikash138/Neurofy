@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "./button";
 import { Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { noteService } from "@/services/noteService";
 import { useAuth } from "@clerk/nextjs";
 
 type AddNoteButtonProps = {
@@ -20,16 +20,9 @@ const AddNoteButton = ({ className }: AddNoteButtonProps) => {
     const payload = { title: "Untitled" };
     try {
       const token = await getToken();
-      const response = await axios.post(
-        "http://localhost:4000/api/v1/create-note",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const neuroId = response.data?.neuroId;
+      if (!token) return;
+      const response = await noteService.createNote(token, payload.title);
+      const neuroId = response?.neuroId;
       router.push(`/notes/${neuroId}`);
     } catch (error) {
       console.log(error);

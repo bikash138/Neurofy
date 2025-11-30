@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect, useRef } from "react";
-import axios from "axios";
+import { noteService } from "@/services/noteService";
 import debounce from "lodash.debounce";
 import { NoteType } from "@/types/types";
 import { formatDate } from "@/lib/formatDate";
@@ -48,16 +48,9 @@ const NotePage = ({ noteId, note }: { noteId: string; note: NoteType }) => {
       title: title,
     };
     const token = await getToken();
-    const response = await axios.put(
-      `http://localhost:4000/api/v1/update-note/${noteId}`,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    console.log(response.data?.message);
+    if (!token) return;
+    const response = await noteService.updateNote(token, noteId, payload);
+    console.log(response.message);
   };
 
   const debouncedSave = debounce(saveNote, 1000);

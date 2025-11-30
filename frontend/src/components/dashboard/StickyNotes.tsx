@@ -10,7 +10,8 @@ import {
   VoiceNoteType,
 } from "@/types/types";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { noteService } from "@/services/noteService";
+import { voiceNoteService } from "@/services/voiceNoteService";
 import { useAuth } from "@clerk/nextjs";
 
 export function StickyNotes() {
@@ -22,30 +23,18 @@ export function StickyNotes() {
   const fetchNotes = async () => {
     try {
       const token = await getToken();
-      const response = await axios.get(
-        "http://localhost:4000/api/v1/get-all-note",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const responseVoiceNotes = await axios.get(
-        "http://localhost:4000/api/v1/get-all-voice-notes",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const initialNotes: AllNotesProps["allNotes"] = response.data?.allNotes;
-      const initialVoiceNotes: VoiceNotesProps["voiceNotes"] =
-        responseVoiceNotes.data?.voiceNotes;
-      setAllNotes(initialNotes);
-      setAllVoiceNotes(initialVoiceNotes);
+      if (!token) return;
+
+      const [notesData, voiceNotesData] = await Promise.all([
+        noteService.getAllNotes(token),
+        voiceNoteService.getAllVoiceNotes(token),
+      ]);
+
+      setAllNotes(notesData?.allNotes || []);
+      setAllVoiceNotes(voiceNotesData?.voiceNotes || []);
     } catch (error) {
       console.log(error);
-      console.log("Failed to get all notes");
+      console.log("Failed to get notes");
     }
   };
 
@@ -67,16 +56,18 @@ export function StickyNotes() {
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-1 auto-rows-auto">
         {/* Demo Voice Note Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="group space-y-2"
-        >
-          {allVoiceNotes.map((voiceNote) => (
-            <VoiceNoteCard key={voiceNote.id} audioUrl={voiceNote.url} />
-          ))}
-        </motion.div>
+        {allVoiceNotes?.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="group space-y-2"
+          >
+            {allVoiceNotes.map((voiceNote) => (
+              <VoiceNoteCard key={voiceNote.id} audioUrl={voiceNote.url} />
+            ))}
+          </motion.div>
+        )}
 
         {allNotes.map((note, index) => (
           <motion.div

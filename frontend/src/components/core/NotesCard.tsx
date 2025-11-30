@@ -7,7 +7,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Pin, MoreVertical } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import axios from "axios";
+import { noteService } from "@/services/noteService";
 import { motion } from "framer-motion";
 import { useAuth } from "@clerk/nextjs";
 
@@ -39,20 +39,17 @@ const NotesCard = ({
     console.log(payload);
     try {
       const token = await getToken();
-      const response = await axios.put(
-        "http://localhost:4000/api/v1/mark-as-pinned",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      if (!token) return;
+      const response = await noteService.togglePin(
+        token,
+        payload.noteId,
+        payload.pinned
       );
-      if (!response.data?.success) {
+      if (!response.success) {
         throw new Error("Cant pin");
       }
       setIsPinned(!isPinned);
-      console.log(response.data.message);
+      console.log(response.message);
     } catch (error) {
       console.log(error);
       console.log("Something went wrong while pinning");
@@ -65,19 +62,12 @@ const NotesCard = ({
     setIsDeleting(true);
     try {
       const token = await getToken();
-      const response = await axios.delete(
-        "http://localhost:4000/api/v1/delete-note",
-        {
-          data: { noteId: note.id },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.data?.success) {
+      if (!token) return;
+      const response = await noteService.deleteNote(token, note.id);
+      if (!response.success) {
         throw new Error("Cant Delete");
       }
-      console.log(response.data.message);
+      console.log(response.message);
       deleteNote(note.id);
     } catch (error) {
       console.log(error);

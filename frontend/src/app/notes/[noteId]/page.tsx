@@ -1,12 +1,20 @@
-import NotePage from '@/components/core/NotePage'
-import axios from 'axios';
+import NotePage from "@/components/core/NotePage";
+import { auth } from "@clerk/nextjs/server";
+import { noteService } from "@/services/noteService";
 
 const Page = async ({ params }: { params: Promise<{ noteId: string }> }) => {
   const { noteId } = await params;
-  const response = await axios.get(`http://localhost:4000/api/v1/get-note/${noteId}`)
-  const note = response.data?.note
+  const { getToken } = await auth();
+  const token = await getToken();
 
-  return <NotePage noteId={noteId} note={note}/>;
+  if (!token) {
+    return <div>Unauthorized</div>;
+  }
+
+  const data = await noteService.getNote(noteId, token);
+  const note = data?.note;
+
+  return <NotePage noteId={noteId} note={note} />;
 };
 
 export default Page;
